@@ -3,7 +3,7 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 
 import LeafletMap from '@/components/map/LeafletMap.vue'
-import { findPlace, focusOnMap, openQuickChat } from '@/store'
+import { buildApiUrl, findPlace, focusOnMap, openQuickChat } from '@/store'
 
 const props = defineProps({
   id: { type: [String, Number], required: true },
@@ -47,7 +47,7 @@ const loadPlaceDetail = async () => {
   errorText.value = ''
 
   try {
-    const response = await fetch(`/api/places/${encodeURIComponent(placeId)}`)
+    const response = await fetch(buildApiUrl(`/places/${encodeURIComponent(placeId)}`))
     if (!response.ok) throw new Error(`HTTP ${response.status}`)
 
     const data = await response.json()

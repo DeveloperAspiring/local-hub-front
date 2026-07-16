@@ -2,7 +2,7 @@
 import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 
-import { busanDistricts, focusOnMap, openQuickChat, places } from '@/store'
+import { buildApiUrl, busanDistricts, focusOnMap, openQuickChat, places } from '@/store'
 
 const router = useRouter()
 
@@ -92,7 +92,7 @@ const loadPlaces = async () => {
   const queryString = buildQuery()
 
   try {
-    const response = await fetch(`/api/places${queryString}`)
+    const response = await fetch(buildApiUrl(`/places${queryString}`))
     if (!response.ok) throw new Error(`HTTP ${response.status}`)
 
     const data = await response.json()

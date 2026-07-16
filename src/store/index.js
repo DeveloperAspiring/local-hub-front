@@ -32,6 +32,18 @@ export const districts = ref(busanDistricts.map((name) => ({ id: name, name })))
 
 const BUSAN_CENTER = [35.1531, 129.1189]
 
+const DEFAULT_API_BASE_URL = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_CHAT_API_URL || (import.meta.env.PROD ? 'https://local-hub-back.onrender.com/api' : '/api')
+
+export function buildApiUrl(path = '') {
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`
+  const base = (DEFAULT_API_BASE_URL || '').trim()
+
+  if (!base) return normalizedPath
+
+  const trimmedBase = base.replace(/\/+$/, '')
+  return /^https?:\/\//i.test(trimmedBase) ? `${trimmedBase}${normalizedPath}` : `${trimmedBase}${normalizedPath}`
+}
+
 function normalizePlace(rawPlace, index = 0) {
   const typeInfo = rawPlace?.place_type ?? {}
   const typeCode = typeInfo.code || rawPlace?.type || 'TOURIST'
@@ -146,7 +158,7 @@ export const places = ref([
 
 export async function loadTopPlaces() {
   try {
-    const response = await fetch('/api/places/main')
+    const response = await fetch(buildApiUrl('/places/main'))
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}`)
     }
@@ -186,8 +198,6 @@ export function focusOnMap(place) {
 // ---------------------------------------------
 // 익명 게시판
 // ---------------------------------------------
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api'
-
 async function apiRequest(path, options = {}) {
   const headers = { Accept: 'application/json', ...(options.headers || {}) }
   const config = { ...options, headers }
@@ -196,7 +206,7 @@ async function apiRequest(path, options = {}) {
     config.headers['Content-Type'] = 'application/json'
   }
 
-  const response = await fetch(`${API_BASE_URL}${path}`, config)
+  const response = await fetch(buildApiUrl(path), config)
   let data = null
 
   try {
@@ -544,7 +554,7 @@ export async function sendChatMessage(text) {
   chat.loading = true
 
   try {
-    const endpoint = import.meta.env.VITE_CHAT_API_URL || '/api/chat'
+    const endpoint = buildApiUrl('/chat')
 
     const controller = new AbortController()
     const timeoutId = setTimeout(() => controller.abort(), 50000)
