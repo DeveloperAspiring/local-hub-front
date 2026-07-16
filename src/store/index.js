@@ -32,7 +32,7 @@ export const districts = ref(busanDistricts.map((name) => ({ id: name, name })))
 
 const BUSAN_CENTER = [35.1531, 129.1189]
 
-const DEFAULT_API_BASE_URL = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_CHAT_API_URL || (import.meta.env.PROD ? 'https://local-hub-back.onrender.com/api' : '/api')
+const DEFAULT_API_BASE_URL =  "https://local-hub-back.onrender.com/api"
 
 export function buildApiUrl(path = '') {
   const normalizedPath = path.startsWith('/') ? path : `/${path}`
