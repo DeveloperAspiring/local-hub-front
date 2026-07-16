@@ -32,16 +32,30 @@ export const districts = ref(busanDistricts.map((name) => ({ id: name, name })))
 
 const BUSAN_CENTER = [35.1531, 129.1189]
 
-const DEFAULT_API_BASE_URL =  "https://local-hub-back.onrender.com/api"
+const DEFAULT_API_BASE_URL = import.meta.env.VITE_API_BASE_URL || (import.meta.env.PROD ? 'https://local-hub-back.onrender.com/api' : '/api')
 
 export function buildApiUrl(path = '') {
-  const normalizedPath = path.startsWith('/') ? path : `/${path}`
-  const base = (DEFAULT_API_BASE_URL || '').trim()
+  const rawPath = (path ?? '').trim()
+  if (!rawPath) return DEFAULT_API_BASE_URL || ''
+
+  const normalizedPath = rawPath.startsWith('/') ? rawPath : `/${rawPath}`
+  const base = (import.meta.env.VITE_API_BASE_URL || DEFAULT_API_BASE_URL || '/api').trim()
 
   if (!base) return normalizedPath
 
   const trimmedBase = base.replace(/\/+$/, '')
-  return /^https?:\/\//i.test(trimmedBase) ? `${trimmedBase}${normalizedPath}` : `${trimmedBase}${normalizedPath}`
+  const normalizedBase = trimmedBase.startsWith('/') ? trimmedBase : `/${trimmedBase}`
+  const baseUsesApiPrefix = normalizedBase.endsWith('/api')
+  const cleanedPath = baseUsesApiPrefix && normalizedPath.startsWith('/api')
+    ? normalizedPath.slice('/api'.length) || '/'
+    : normalizedPath
+
+  if (/^https?:\/\//i.test(trimmedBase)) {
+    const relativePath = cleanedPath.replace(/^\/+/, '')
+    return new URL(relativePath, `${trimmedBase}/`).toString()
+  }
+
+  return `${normalizedBase}${cleanedPath.startsWith('/') ? cleanedPath : `/${cleanedPath}`}`
 }
 
 function normalizePlace(rawPlace, index = 0) {
