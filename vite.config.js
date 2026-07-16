@@ -9,7 +9,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'https://local-hub-back.onrender.com/',
+        target: 'https://local-hub-back.onrender.com',
         changeOrigin: true,
         secure: false,
       },
